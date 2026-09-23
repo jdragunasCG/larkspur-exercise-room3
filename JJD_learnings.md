@@ -6,20 +6,42 @@
 (canon at git tag `v1`). Build 3 (step 3.1, "Build the proof") is in
 progress: `evals/cases.json` has 7 cases (5 given + 2 authored by John
 Dragunas), committed and pushed to `origin/main`. Full suite last run:
-**4/7 passed, RELEASE BLOCKED** by `tone_safety` and `scope`. `verify.py 3.1`
-has **not** been run yet — that's the actual gate, and it does not require
-cases to pass.
+**4/7 passed, RELEASE BLOCKED** by `tone_safety` and `scope`.
 
-**Next action, resuming mid-Build-3:**
-1. Decide what to do with the failures (see "Build 3 status" below) — or
-   decide to leave them and move straight to the gate, since `verify.py 3.1`
-   doesn't require passing cases.
-2. `python3 verify.py 3.1` — the actual gate.
-3. `python3 demo/serve.py` — start the demo, read the evals panel.
-4. Bring three things to share-out: the case written first (`scope-0201`),
+**`verify.py 3.1` has been run: 1/9 checks failed.** Only one thing is
+blocking it:
+
+```
+Step 3.1: Build 3 · Build the proof
+
+  ✓ at least 3 eval cases (7)
+  ✓ at least 2 of them are hard gates (5)
+  ✓ every case says what it expects
+  ✓ at least one case is authored by you (John Dragunas)
+  ✓ the last eval_harness run was YOUR cases, not the examples
+  ✓ the run covered at least 3 cases (ran 7 of the 7 in cases.json, 7 scored, release BLOCKED)
+  · (no bench pair yet. The evidence panel will show bench numbers once Build 4 runs. Nothing required here.)
+  ✗ PITCH.md: the 'Number:' line carries a figure, a unit and a denominator
+      → The 'Number:' line is there but incomplete. It needs a denominator (per what: per contact, per ticket type, n=). A figure on its own is not a claim: '$0.0234 per resolved contact, 5 ticket types, 3 runs each' is, because somebody can check every part of it.
+  ✓ PITCH.md, whole file: more than the shipped template (171 words, floor is 40)
+  ✓ PITCH.md: the 'Still broken:' line names one thing that still does not work
+
+1/9 checks failed. Fix the ✗ lines above, then re-run.
+```
+
+**Immediate next action:** `PITCH.md`'s `Number:` line ("K7PQ2M resolves in
+4 API turns, 3 tool calls, after the loop fixes (was 5 turns and broken
+before)") needs an explicit denominator added — a "per X" (per resolved
+ticket? per contact?). **Waiting on the user's answer to this before
+writing it in** — this is one of the "your words" fields per CLAUDE.md, not
+something to draft. Once that's added, re-run `python3 verify.py 3.1`.
+
+**After that passes:**
+1. `python3 demo/serve.py` — start the demo, read the evals panel.
+2. Bring three things to share-out: the case written first (`scope-0201`),
    its expectation sentence, and the case the agent failed (`tone-0201`, or
    `tone-0101`/`scope-0101` from the given examples).
-5. Ship Build 3 the same correct way as Build 1+2: `python3 readout.py` →
+3. Ship Build 3 the same correct way as Build 1+2: `python3 readout.py` →
    `python3 pod_sync.py --push-canon --note "..."` → (team decision on
    whether to re-tag).
 
