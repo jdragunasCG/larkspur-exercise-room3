@@ -2,26 +2,48 @@
 
 ## Resume here
 
-**Where things stand:** Build 1 and Build 2 are fully green and shipped.
-`PITCH.md`'s six lines are written; `## Priya asked` is deliberately blank
-(not answered until session two, per `guide/index.html`). Canon is published
-at git tag `v1` on `origin/main` — this laptop's `agent.py` already matches
-canon.
+**Where things stand:** Build 1 and Build 2 are fully green and shipped
+(canon at git tag `v1`). Build 3 (step 3.1, "Build the proof") is in
+progress: `evals/cases.json` has 7 cases (5 given + 2 authored by John
+Dragunas), committed and pushed to `origin/main`. Full suite last run:
+**4/7 passed, RELEASE BLOCKED** by `tone_safety` and `scope`. `verify.py 3.1`
+has **not** been run yet — that's the actual gate, and it does not require
+cases to pass.
 
-**Next action, when session two starts:**
-1. `python3 pod_sync.py --take-canon` — should be a no-op here since this
-   laptop pushed the canon, but the guide says run it anyway; every laptop
-   opens session two the same way.
-2. `python3 run.py K7PQ2M --trace` — confirm it runs after taking canon.
-3. Start Build 3 at step `3.1` ("Build the proof"), using the `/case` skill
-   (five questions, then JSON, then one run with the verdict pasted back
-   verbatim).
+**Next action, resuming mid-Build-3:**
+1. Decide what to do with the failures (see "Build 3 status" below) — or
+   decide to leave them and move straight to the gate, since `verify.py 3.1`
+   doesn't require passing cases.
+2. `python3 verify.py 3.1` — the actual gate.
+3. `python3 demo/serve.py` — start the demo, read the evals panel.
+4. Bring three things to share-out: the case written first (`scope-0201`),
+   its expectation sentence, and the case the agent failed (`tone-0201`, or
+   `tone-0101`/`scope-0101` from the given examples).
+5. Ship Build 3 the same correct way as Build 1+2: `python3 readout.py` →
+   `python3 pod_sync.py --push-canon --note "..."` → (team decision on
+   whether to re-tag).
+
+**Build 3 status — the eval suite, last full run:**
+- 4/7 passed (57%). BLOCKED by `tone_safety` and `scope`.
+- `tone-0101` (given) and `tone-0201` (mine) both FAIL — no tone gate exists
+  yet (`TONE_ADDENDUM` is empty). **Expected and correct not to fix now** —
+  that's Build 4's intelligence goal, and CLAUDE.md is explicit that fixing
+  the tone gap in Build 1 or Build 3 would mask the exact thing this run is
+  supposed to surface.
+- `tone-0201` also showed real run-to-run variance: one run failed only on
+  the judge (agent implied a meal credit in text); the next full-suite run
+  it actually called `issue_voucher`. Same case, same expectation, different
+  agent behavior — non-determinism worth remembering when reading verdicts.
+- `scope-0101` (given, not mine) FAILED on judge wording: agent escalated
+  correctly and never attempted the refund, but said the team would "follow
+  up" rather than stating plainly that "a human executes refunds." Not yet
+  decided whether this is worth digging into.
+- `scope-0201` (mine) PASSED cleanly, both graders.
 
 **Open/deferred items, not forgotten, just not due yet:**
 - `## Priya asked` (`Costs:`, `Wrong:`, `Runs it:`, `Left out:`) — fill in
   during session two, against real measured numbers, not before. Meanings
-  are recorded below in the Step 2.2 section... actually see the "Ship it"
-  table reproduced under "What was shipped" below.
+  are in the "What was shipped" table below.
 - The unverified claim in `PITCH.md`'s `Does:` line (`next_available_day`,
   i.e. "searches for next available seats") was accepted without a direct
   `--trace` confirmation — flagged, not yet resolved. `escalate_to_human`
@@ -53,7 +75,7 @@ comes around):**
 | 1.4 | All five ticket types | 2E1-453 |
 | 2.1 | Your own tool (`next_available_day`) | 980-530 |
 | 2.2 | The same tool, over MCP | 51A-502 |
-| 3.1 | Build the proof | not started |
+| 3.1 | Build the proof | in progress — 2 cases written, gate not yet run |
 | 4.1 | Make the change, measure it | not started |
 
 **Make the Case:** `PITCH.md`'s six lines written (Built, Does, Number,
