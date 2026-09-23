@@ -1,3 +1,82 @@
+# Larkspur Build — Progress & Learnings
+
+## Resume here
+
+**Where things stand:** Build 1 and Build 2 are fully green and shipped.
+`PITCH.md`'s six lines are written; `## Priya asked` is deliberately blank
+(not answered until session two, per `guide/index.html`). Canon is published
+at git tag `v1` on `origin/main` — this laptop's `agent.py` already matches
+canon.
+
+**Next action, when session two starts:**
+1. `python3 pod_sync.py --take-canon` — should be a no-op here since this
+   laptop pushed the canon, but the guide says run it anyway; every laptop
+   opens session two the same way.
+2. `python3 run.py K7PQ2M --trace` — confirm it runs after taking canon.
+3. Start Build 3 at step `3.1` ("Build the proof"), using the `/case` skill
+   (five questions, then JSON, then one run with the verdict pasted back
+   verbatim).
+
+**Open/deferred items, not forgotten, just not due yet:**
+- `## Priya asked` (`Costs:`, `Wrong:`, `Runs it:`, `Left out:`) — fill in
+  during session two, against real measured numbers, not before. Meanings
+  are recorded below in the Step 2.2 section... actually see the "Ship it"
+  table reproduced under "What was shipped" below.
+- The unverified claim in `PITCH.md`'s `Does:` line (`next_available_day`,
+  i.e. "searches for next available seats") was accepted without a direct
+  `--trace` confirmation — flagged, not yet resolved. `escalate_to_human`
+  *was* confirmed directly (`python3 run.py G2HL9V --trace`).
+- `readout.py` noted all five ticket types aren't shown on the readout page;
+  `python3 run.py --all` would add them. Optional, not required to ship.
+- Repo could not be made GitHub-public (fork visibility restriction inherited
+  from the template repo); `victorsteeb` was added as a collaborator instead,
+  which was treated as satisfying the intent.
+- `TEAM.md` is still the blank template — no teammates registered yet as of
+  this session.
+
+**What was shipped (Priya's four questions, for reference when session two
+comes around):**
+
+| She asks | What she means |
+|---|---|
+| What it costs | Cost per resolved contact, against the $6.90 a human contact costs |
+| When it is wrong | The first untrue thing it says, and what happens after |
+| Who runs it | Who runs it in June, after your team has left |
+| What you left out | What scope you cut, and why |
+
+---
+
+| Step | What it covers | Evidence code |
+|---|---|---|
+| 1.2 | Make the loop keep going | 96C-CB0 |
+| 1.3 | Make the tools route | F00-731 |
+| 1.4 | All five ticket types | 2E1-453 |
+| 2.1 | Your own tool (`next_available_day`) | 980-530 |
+| 2.2 | The same tool, over MCP | 51A-502 |
+| 3.1 | Build the proof | not started |
+| 4.1 | Make the change, measure it | not started |
+
+**Make the Case:** `PITCH.md`'s six lines written (Built, Does, Number,
+Safety check, Next, Still broken, Lever). The four lines under
+`## Priya asked` are deliberately left blank — per `guide/index.html`,
+those aren't answered until session two, against real measured numbers.
+
+**Ship it:** done via the guide's actual sequence — `python3 readout.py`,
+then `python3 pod_sync.py --push-canon --note "..."`, then
+`git tag v1 && git push origin HEAD --tags`. Facilitator (`victorsteeb`)
+added as a collaborator. "Make public" was blocked — GitHub does not allow
+changing a fork's visibility independently of its parent template repo — so
+collaborator access stands in for it. Confirmed `.env` never committed
+(`git check-ignore .env && git log --all --oneline -- .env`).
+
+Correction along the way: an earlier manual `git commit`/`git push` of
+`agent.py` (before finding `guide/index.html`) bypassed the canon mechanism.
+The actual mechanism is `pod_sync.py --push-canon`, which regenerates the
+readout from the current `agent.py` and publishes `agent.py`, `readout.html`,
+`readout-trace.json`, and `PITCH.md` together as the team's canon.
+
+---
+
 # Learnings — Step 1.2 (Build 1: Make the loop keep going)
 
 ## The concept
