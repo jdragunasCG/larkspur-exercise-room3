@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Larkspur Disruption Agent — Cost Lever Pitch</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page:        #f9f9f7;
+    --surface-1:   #fcfcfb;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:    #e1e0d9;
+    --axis:        #c3c2b7;
+    --border:      rgba(11,11,11,0.10);
+    --success:     #006300;
+    --before:      #86b6ef;
+    --after:       #2a78d6;
+    --stat-good:   #0ca30c;
+    --stat-warn:   #fab219;
+    --stat-serious:#ec835a;
+    --stat-critical:#d03b3b;
+    --fresh:       #c3c2b7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page:        #0d0d0d;
+      --surface-1:   #1a1a19;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:    #2c2c2a;
+      --axis:        #383835;
+      --border:      rgba(255,255,255,0.10);
+      --success:     #0ca30c;
+      --before:      #184f95;
+      --after:       #3987e5;
+      --stat-good:   #0ca30c;
+      --stat-warn:   #fab219;
+      --stat-serious:#ec835a;
+      --stat-critical:#e66767;
+      --fresh:       #52514e;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding-block: 32px 64px;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding-inline: 20px; }
+
+  header.hero { text-align: center; margin-bottom: 40px; }
+  .kicker {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--text-secondary); background: var(--surface-1); border: 1px solid var(--border);
+    padding: 4px 10px; border-radius: 999px; margin-bottom: 16px;
+  }
+  .kicker .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--after); }
+  h1 { font-size: clamp(24px, 4vw, 34px); margin: 0 0 8px; line-height: 1.25; }
+  .sub { color: var(--text-secondary); font-size: 15px; max-width: 640px; margin: 0 auto; }
+
+  .hero-stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+    gap: 12px; margin-top: 28px;
+  }
+  .stat-tile {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 16px; text-align: left;
+  }
+  .stat-tile .label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+  .stat-tile .value { font-size: 28px; font-weight: 600; font-variant-numeric: proportional-nums; }
+  .stat-tile .delta { font-size: 13px; margin-top: 4px; font-weight: 600; }
+  .stat-tile .delta.good { color: var(--success); }
+  .stat-tile .note { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+  section { margin: 48px 0; }
+  h2 { font-size: 20px; margin: 0 0 4px; }
+  .section-note { color: var(--text-secondary); font-size: 14px; margin: 0 0 20px; max-width: 680px; }
+
+  .pitch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 12px; }
+  .pitch-card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px;
+  }
+  .pitch-card .k { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--after); margin-bottom: 6px; }
+  .pitch-card p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--text-primary); }
+  .pitch-card.warn { border-color: color-mix(in srgb, var(--stat-warn) 40%, var(--border)); }
+  .pitch-card.warn .k { color: color-mix(in srgb, var(--stat-warn) 70%, var(--text-primary)); }
+
+  .lever-badge {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 14px;
+    background: color-mix(in srgb, var(--after) 12%, var(--surface-1));
+    border: 1px solid color-mix(in srgb, var(--after) 35%, var(--border));
+    color: var(--after); font-weight: 700; font-size: 13px;
+    padding: 6px 12px; border-radius: 999px;
+  }
+
+  .chart-card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px; position: relative;
+  }
+  .chart-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+  .chart-head h3 { font-size: 15px; margin: 0; }
+  .chart-head .metric-note { font-size: 12px; color: var(--text-muted); }
+
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 10px 0 2px; font-size: 12px; color: var(--text-secondary); }
+  .legend .item { display: flex; align-items: center; gap: 6px; }
+  .legend .swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+  svg.chart { width: 100%; height: auto; display: block; overflow: visible; }
+  .bar { cursor: pointer; }
+  .bar:hover, .bar:focus { filter: brightness(1.08); outline: none; }
+  .axis-label { fill: var(--text-muted); font-size: 11px; font-family: system-ui, sans-serif; }
+  .value-label { fill: var(--text-primary); font-size: 12px; font-weight: 600; font-family: system-ui, sans-serif; }
+  .gridline { stroke: var(--gridline); stroke-width: 1; }
+
+  .compare-row { display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
+  .compare-bar-wrap { display: grid; grid-template-columns: 70px 1fr 100px; align-items: center; gap: 10px; }
+  .compare-bar-wrap .cb-label { font-size: 13px; color: var(--text-secondary); }
+  .compare-bar-track { height: 24px; background: var(--gridline); border-radius: 4px; overflow: hidden; }
+  .compare-bar-fill { height: 100%; border-radius: 4px 0 0 4px; transition: width .2s; }
+  .compare-bar-wrap .cb-value { font-size: 14px; font-weight: 700; text-align: right; font-variant-numeric: proportional-nums; }
+
+  .tooltip {
+    position: fixed; pointer-events: none; z-index: 50;
+    background: var(--text-primary); color: var(--page);
+    font-size: 12px; padding: 6px 10px; border-radius: 6px;
+    max-width: 220px; line-height: 1.4; opacity: 0; transition: opacity .1s;
+  }
+  .tooltip strong { font-variant-numeric: proportional-nums; }
+
+  .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 16px; }
+
+  table.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.data-table caption { text-align: left; font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+  table.data-table th, table.data-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--gridline); }
+  table.data-table th { color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+  table.data-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  details.table-toggle { margin-top: 16px; }
+  details.table-toggle summary { cursor: pointer; font-size: 13px; color: var(--after); font-weight: 600; }
+  .table-wrap { overflow-x: auto; margin-top: 12px; }
+
+  .callout {
+    background: color-mix(in srgb, var(--stat-warn) 10%, var(--surface-1));
+    border: 1px solid color-mix(in srgb, var(--stat-warn) 35%, var(--border));
+    border-radius: 12px; padding: 18px 20px;
+  }
+  .callout h3 { margin: 0 0 8px; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+  .callout h3::before { content: "⚠"; color: color-mix(in srgb, var(--stat-warn) 70%, var(--text-primary)); }
+  .callout p { margin: 0 0 8px; font-size: 14px; line-height: 1.55; color: var(--text-secondary); }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .scaling {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px;
+  }
+  .scaling p { font-size: 15px; line-height: 1.6; margin: 0 0 12px; }
+  .scaling p:last-child { margin-bottom: 0; color: var(--text-secondary); font-size: 14px; }
+
+  footer { margin-top: 56px; text-align: center; color: var(--text-muted); font-size: 12px; }
+  code.evidence { background: var(--surface-1); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="kicker"><span class="dot"></span>Build 4 · Cost lever</span>
+    <h1>Caching the request prefix cut Larkspur's model cost 62%</h1>
+    <p class="sub">Disruption-care agent for Larkspur Airlines — same tool loop, same resolution rate, one change to how the request is built.</p>
+    <div class="hero-stats">
+      <div class="stat-tile">
+        <div class="label">Model cost / contact</div>
+        <div class="value">$0.0214</div>
+        <div class="delta good">▼ 62% from $0.0563</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">Input tokens / contact</div>
+        <div class="value">2,602</div>
+        <div class="delta good">▼ 83% from 15,635</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">At Larkspur volume</div>
+        <div class="value">$293<span style="font-size:15px;font-weight:500;color:var(--text-secondary)">/wk</span></div>
+        <div class="delta good">▼ from $771/wk</div>
+        <div class="note">13,700 chats/week</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">Stage 1 resolved</div>
+        <div class="value">15/15</div>
+        <div class="note">unchanged, no regression</div>
+      </div>
+    </div>
+  </header>
+
+  <section>
+    <h2>The pitch</h2>
+    <p class="section-note">Six lines and a lever, from <code>PITCH.md</code>.</p>
+    <div class="pitch-grid">
+      <div class="pitch-card">
+        <div class="k">Built</div>
+        <p>A disruption-care agent for Larkspur that resolves cancellations, delays and diversions using APIs, MCPs and tools.</p>
+      </div>
+      <div class="pitch-card">
+        <div class="k">Does</div>
+        <p>Checks flights, searches for next available seats, resolves entitlements and escalates as needed.</p>
+      </div>
+      <div class="pitch-card">
+        <div class="k">Number</div>
+        <p>Caching the system prompt and tool list cut model cost at Larkspur's volume from $771/week to $293/week (13,700 chats/week) — a 62% reduction — measured on Stage 1's 5 ticket types, 3 runs each.</p>
+      </div>
+      <div class="pitch-card">
+        <div class="k">Safety check</div>
+        <p><code>check_policy</code> and <code>search_alternatives</code> re-derive fare family, loyalty tier, and overnight status from the booking every call — never taken as arguments, so the model can't be talked into a wrong entitlement.</p>
+      </div>
+      <div class="pitch-card">
+        <div class="k">Next</div>
+        <p>Fix the abusive-message tone gap, validate with automated tests, then add tracing/observability (OpenTelemetry or similar).</p>
+      </div>
+      <div class="pitch-card warn">
+        <div class="k">Still broken</div>
+        <p><code>R8KD3F</code> (abusive message) resolves calm and helpful with no tone gate at all right now. "Rebooks" is unverified past the offer stage in every trace run so far.</p>
+      </div>
+    </div>
+    <div class="lever-badge">Lever: cost — evidence code B30-BF0</div>
+  </section>
+
+  <section>
+    <h2>Model cost and tokens, before → after</h2>
+    <p class="section-note">Same 5 Stage-1 ticket types, 3 runs each, same model both sides. Only the request-building lever changed.</p>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-head"><h3>Model cost per contact</h3><span class="metric-note">USD, model only</span></div>
+        <div class="compare-row">
+          <div class="compare-bar-wrap">
+            <span class="cb-label">Before</span>
+            <div class="compare-bar-track"><div class="compare-bar-fill" style="width:100%; background:var(--before)"></div></div>
+            <span class="cb-value">$0.0563</span>
+          </div>
+          <div class="compare-bar-wrap">
+            <span class="cb-label">After</span>
+            <div class="compare-bar-track"><div class="compare-bar-fill" style="width:38%; background:var(--after)"></div></div>
+            <span class="cb-value">$0.0214</span>
+          </div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head"><h3>Input tokens per contact</h3><span class="metric-note">mean across all runs</span></div>
+        <div class="compare-row">
+          <div class="compare-bar-wrap">
+            <span class="cb-label">Before</span>
+            <div class="compare-bar-track"><div class="compare-bar-fill" style="width:100%; background:var(--before)"></div></div>
+            <span class="cb-value">15,635</span>
+          </div>
+          <div class="compare-bar-wrap">
+            <span class="cb-label">After</span>
+            <div class="compare-bar-track"><div class="compare-bar-fill" style="width:17%; background:var(--after)"></div></div>
+            <span class="cb-value">2,602</span>
+          </div>
+        </div>
+        <p class="section-note" style="margin-top:14px; margin-bottom:0;">Output tokens held flat (629 → 633) — the savings come from what's sent, not shorter answers.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Holds across every ticket type</h2>
+    <p class="section-note">The lever isn't tuned to one ticket shape — input tokens per contact, averaged over 3 runs, for all 5 Stage-1 types.</p>
+    <div class="chart-card">
+      <div class="legend">
+        <span class="item"><span class="swatch" style="background:var(--before)"></span>Before</span>
+        <span class="item"><span class="swatch" style="background:var(--after)"></span>After</span>
+      </div>
+      <svg class="chart" id="ticketChart" viewBox="0 0 860 320" role="img" aria-label="Input tokens per contact by ticket type, before and after caching"></svg>
+    </div>
+  </section>
+
+  <section>
+    <h2>How the cache pays off, turn by turn</h2>
+    <p class="section-note">One live conversation (<code>K7PQ2M</code>, 4 API turns). Turn 1 pays to write the cache; every turn after reads it instead.</p>
+    <div class="chart-card">
+      <div class="legend">
+        <span class="item"><span class="swatch" style="background:var(--stat-warn)"></span>Cache write (one-time)</span>
+        <span class="item"><span class="swatch" style="background:var(--stat-good)"></span>Cache read (reused)</span>
+        <span class="item"><span class="swatch" style="background:var(--fresh)"></span>Fresh (growing history)</span>
+      </div>
+      <svg class="chart" id="cacheChart" viewBox="0 0 860 300" role="img" aria-label="Cache write, cache read, and fresh tokens per API turn"></svg>
+    </div>
+  </section>
+
+  <section>
+    <h2>What this means at scale</h2>
+    <div class="scaling">
+      <p>Because the cache covers the fixed part of every request — the system prompt and tool list — the savings compound with volume rather than staying flat: the more contacts per week, the more turns hit the cache instead of paying full price. At Larkspur's current 13,700 chats/week that's already $771 → $293/week on Stage 1's easier ticket types.</p>
+      <p>We haven't yet measured whether the same 62% holds on harder Stage 2 cases, at concurrent load, or on live traffic — that's the next thing to prove, not something we're claiming today.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="callout">
+      <h3>What's not proven yet</h3>
+      <p><strong>Tone.</strong> <code>R8KD3F</code> (an abusive message) still resolves calm and helpful with no tone gate at all — a separate, undone build goal, not touched by this lever.</p>
+      <p><strong>Scope.</strong> This result is Stage 1 only (the 5 easier ticket types). Stage 2's harder cases haven't been benched against this change.</p>
+      <p><strong>Loaded cost.</strong> $0.0214/contact is model cost only — Larkspur's fully loaded cost (infra, support, monitoring) hasn't been measured against it.</p>
+    </div>
+  </section>
+
+  <details class="table-toggle">
+    <summary>View the underlying numbers as a table</summary>
+    <div class="table-wrap">
+      <table class="data-table">
+        <caption>Before vs. after, Stage 1, 3 runs per ticket type (source: <code>.workshop/bench-before.json</code>, <code>bench-after.json</code>)</caption>
+        <thead>
+          <tr><th>Metric</th><th>Before</th><th>After</th><th>Change</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Resolved</td><td class="num">15/15</td><td class="num">15/15</td><td class="num">no change</td></tr>
+          <tr><td>p50 latency</td><td class="num">10.84s</td><td class="num">10.40s</td><td class="num">-4%</td></tr>
+          <tr><td>Slowest observed</td><td class="num">13.29s</td><td class="num">12.72s</td><td class="num">-4%</td></tr>
+          <tr><td>Turns (mean)</td><td class="num">3.80</td><td class="num">3.80</td><td class="num">no change</td></tr>
+          <tr><td>Input tokens / contact</td><td class="num">15,635</td><td class="num">2,602</td><td class="num">-83%</td></tr>
+          <tr><td>Output tokens / contact</td><td class="num">629</td><td class="num">633</td><td class="num">+1%</td></tr>
+          <tr><td>Cache hit rate</td><td class="num">off</td><td class="num">83%</td><td class="num">cache turned on</td></tr>
+          <tr><td>Model cost / contact</td><td class="num">$0.0563</td><td class="num">$0.0214</td><td class="num">-62%</td></tr>
+          <tr><td>Model cost at volume (13,700 chats/wk)</td><td class="num">$771/wk</td><td class="num">$293/wk</td><td class="num">-62%</td></tr>
+        </tbody>
+      </table>
+      <table class="data-table" style="margin-top:20px;">
+        <caption>Input tokens per contact by ticket type (mean of 3 runs)</caption>
+        <thead><tr><th>Ticket type</th><th>Before</th><th>After</th><th>Change</th></tr></thead>
+        <tbody id="ticketTableBody"></tbody>
+      </table>
+      <table class="data-table" style="margin-top:20px;">
+        <caption>Cache write / read per API turn — PNR K7PQ2M, single conversation</caption>
+        <thead><tr><th>Turn</th><th>Cache write</th><th>Cache read</th><th>Fresh input</th></tr></thead>
+        <tbody id="cacheTableBody"></tbody>
+      </table>
+    </div>
+  </details>
+
+  <footer>
+    Larkspur disruption-care agent · Build 4, step 4.1 · evidence code <code class="evidence">B30-BF0</code>
+  </footer>
+</div>
+
+<div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var tooltip = document.getElementById("tooltip");
+  function showTip(evt, html) {
+    tooltip.innerHTML = "";
+    tooltip.appendChild(html);
+    tooltip.style.opacity = "1";
+    positionTip(evt);
+  }
+  function positionTip(evt) {
+    var x = evt.clientX, y = evt.clientY;
+    tooltip.style.left = Math.min(x + 14, window.innerWidth - 230) + "px";
+    tooltip.style.top = Math.max(y - 40, 8) + "px";
+  }
+  function hideTip() { tooltip.style.opacity = "0"; }
+
+  function tipContent(rows) {
+    var frag = document.createDocumentFragment();
+    rows.forEach(function (r) {
+      var line = document.createElement("div");
+      var strong = document.createElement("strong");
+      strong.textContent = r.value;
+      line.appendChild(document.createTextNode(r.label + ": "));
+      line.appendChild(strong);
+      frag.appendChild(line);
+    });
+    return frag;
+  }
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs) {
+    var e = document.createElementNS(svgNS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  // ---- Grouped bar chart: per-ticket-type input tokens, before/after ----
+  var ticketData = [
+    { name: "K7PQ2M", label: "Clean cancellation",      before: 16596, after: 2889 },
+    { name: "M3XR8T", label: "Delay under threshold",   before: 16545, after: 2823 },
+    { name: "T9WN4C", label: "Ambiguous connection",    before: 16504, after: 2797 },
+    { name: "G2HL9V", label: "Out-of-scope group",      before: 11981, after: 1655 },
+    { name: "R8KD3F", label: "Abusive message",         before: 16549, after: 2847 }
+  ];
+
+  (function renderTicketChart() {
+    var svg = document.getElementById("ticketChart");
+    var W = 860, H = 320, padL = 54, padR = 16, padT = 16, padB = 46;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var yMax = 18000;
+    var yTicks = [0, 4000, 8000, 12000, 16000];
+    var n = ticketData.length;
+    var groupW = plotW / n;
+    var barW = 24, gap = 4;
+
+    yTicks.forEach(function (t) {
+      var y = padT + plotH - (t / yMax) * plotH;
+      svg.appendChild(el("line", { x1: padL, x2: W - padR, y1: y, y2: y, class: "gridline" }));
+      var lbl = el("text", { x: padL - 8, y: y + 4, class: "axis-label", "text-anchor": "end" });
+      lbl.textContent = t.toLocaleString();
+      svg.appendChild(lbl);
+    });
+    svg.appendChild(el("line", { x1: padL, x2: W - padR, y1: padT + plotH, y2: padT + plotH, stroke: "var(--axis)", "stroke-width": 1 }));
+
+    ticketData.forEach(function (d, i) {
+      var cx = padL + groupW * i + groupW / 2;
+      [{ key: "before", color: "var(--before)", offset: -1 }, { key: "after", color: "var(--after)", offset: 1 }].forEach(function (s) {
+        var val = d[s.key];
+        var h = (val / yMax) * plotH;
+        var x = cx + s.offset * (barW / 2 + gap / 2) - barW / 2;
+        var y = padT + plotH - h;
+        var bar = el("rect", {
+          x: x, y: y, width: barW, height: Math.max(h, 1), rx: 4, ry: 4,
+          fill: s.color, class: "bar", tabindex: "0",
+          "aria-label": d.label + " " + s.key + ": " + val.toLocaleString() + " tokens"
+        });
+        bar.addEventListener("pointerenter", function (e) {
+          showTip(e, tipContent([
+            { label: d.label, value: "" },
+            { label: s.key === "before" ? "Before" : "After", value: val.toLocaleString() + " tokens" }
+          ]));
+        });
+        bar.addEventListener("pointermove", positionTip);
+        bar.addEventListener("pointerleave", hideTip);
+        bar.addEventListener("focus", function (e) {
+          var r = e.target.getBoundingClientRect();
+          showTip({ clientX: r.left, clientY: r.top }, tipContent([
+            { label: d.label, value: "" },
+            { label: s.key === "before" ? "Before" : "After", value: val.toLocaleString() + " tokens" }
+          ]));
+        });
+        bar.addEventListener("blur", hideTip);
+        svg.appendChild(bar);
+      });
+      var xlabel = el("text", { x: cx, y: H - padB + 18, class: "axis-label", "text-anchor": "middle" });
+      xlabel.textContent = d.name;
+      svg.appendChild(xlabel);
+    });
+
+    var tbody = document.getElementById("ticketTableBody");
+    ticketData.forEach(function (d) {
+      var pct = Math.round((1 - d.after / d.before) * 100);
+      var tr = document.createElement("tr");
+      [d.name + " — " + d.label, d.before.toLocaleString(), d.after.toLocaleString(), "-" + pct + "%"].forEach(function (v, idx) {
+        var td = document.createElement("td");
+        if (idx > 0) td.className = "num";
+        td.textContent = v;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  })();
+
+  // ---- Stacked bar chart: cache write / read / fresh per turn ----
+  var turnData = [
+    { turn: 1, write: 3429, read: 0, fresh: 132 },
+    { turn: 2, write: 0, read: 3429, fresh: 464 },
+    { turn: 3, write: 0, read: 3429, fresh: 782 },
+    { turn: 4, write: 0, read: 3429, fresh: 1513 }
+  ];
+
+  (function renderCacheChart() {
+    var svg = document.getElementById("cacheChart");
+    var W = 860, H = 300, padL = 54, padR = 16, padT = 16, padB = 40;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var yMax = 5200;
+    var yTicks = [0, 1500, 3000, 4500];
+    var n = turnData.length;
+    var slotW = plotW / n;
+    var barW = 60;
+
+    yTicks.forEach(function (t) {
+      var y = padT + plotH - (t / yMax) * plotH;
+      svg.appendChild(el("line", { x1: padL, x2: W - padR, y1: y, y2: y, class: "gridline" }));
+      var lbl = el("text", { x: padL - 8, y: y + 4, class: "axis-label", "text-anchor": "end" });
+      lbl.textContent = t.toLocaleString();
+      svg.appendChild(lbl);
+    });
+    svg.appendChild(el("line", { x1: padL, x2: W - padR, y1: padT + plotH, y2: padT + plotH, stroke: "var(--axis)", "stroke-width": 1 }));
+
+    var segColors = { write: "var(--stat-warn)", read: "var(--stat-good)", fresh: "var(--fresh)" };
+    var segLabels = { write: "Cache write", read: "Cache read", fresh: "Fresh input" };
+
+    turnData.forEach(function (d, i) {
+      var cx = padL + slotW * i + slotW / 2;
+      var x = cx - barW / 2;
+      var yCursor = padT + plotH;
+      var total = d.write + d.read + d.fresh;
+      ["fresh", "read", "write"].forEach(function (key) {
+        var val = d[key];
+        if (val <= 0) return;
+        var h = (val / yMax) * plotH;
+        var y = yCursor - h;
+        var bar = el("rect", {
+          x: x, y: y, width: barW, height: Math.max(h, 1),
+          fill: segColors[key], class: "bar", tabindex: "0",
+          "aria-label": "Turn " + d.turn + " " + segLabels[key] + ": " + val.toLocaleString() + " tokens"
+        });
+        bar.addEventListener("pointerenter", function (e) {
+          showTip(e, tipContent([
+            { label: "Turn " + d.turn, value: total.toLocaleString() + " total" },
+            { label: segLabels[key], value: val.toLocaleString() }
+          ]));
+        });
+        bar.addEventListener("pointermove", positionTip);
+        bar.addEventListener("pointerleave", hideTip);
+        bar.addEventListener("focus", function (e) {
+          var r = e.target.getBoundingClientRect();
+          showTip({ clientX: r.left, clientY: r.top }, tipContent([
+            { label: "Turn " + d.turn, value: total.toLocaleString() + " total" },
+            { label: segLabels[key], value: val.toLocaleString() }
+          ]));
+        });
+        bar.addEventListener("blur", hideTip);
+        svg.appendChild(bar);
+        yCursor = y;
+      });
+      var xlabel = el("text", { x: cx, y: H - padB + 18, class: "axis-label", "text-anchor": "middle" });
+      xlabel.textContent = "Turn " + d.turn;
+      svg.appendChild(xlabel);
+    });
+
+    var tbody = document.getElementById("cacheTableBody");
+    turnData.forEach(function (d) {
+      var tr = document.createElement("tr");
+      [("Turn " + d.turn), d.write.toLocaleString(), d.read.toLocaleString(), d.fresh.toLocaleString()].forEach(function (v, idx) {
+        var td = document.createElement("td");
+        if (idx > 0) td.className = "num";
+        td.textContent = v;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  })();
+})();
+</script>
+</body>
+</html>
